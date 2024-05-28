@@ -1539,6 +1539,44 @@ class GPG(object):
                 os.remove(fn)
         return result
 
+
+    def check_sigs(self, fileobj_or_path, extra_args=None, close_file=True):
+        """
+        Check signatures.
+
+        Args:
+            fileobj_or_path (str|file): A path to a file, or a file-like object containing the keys.
+
+            close_file (bool): If a file-like object is passed in, whether to close it.
+
+            extra_args (list[str]): Additional arguments to pass to `gpg`.
+        """
+        logger.debug('check_sigs: %r', fileobj_or_path)
+        result = self.result_map['check_sigs'](self)
+        args = ['--check-sigs']
+        if extra_args:  # pragma: no cover
+            args.extend(extra_args)
+        
+        import tempfile
+        fd, fn = tempfile.mkstemp(prefix='pygpg-')
+        s = fileobj_or_path.read()
+        if close_file:
+            fileobj_or_path.close()
+        logger.debug('Wrote to temp file: %r', s)
+        os.write(fd, s)
+        os.close(fd)
+        args.append(self.no_quote(fn))
+        
+        try:
+            p = self._open_subprocess(args)
+            self._collect_output(p, result, stdin=p.stdin)
+        finally:
+            os.remove(fn)
+        
+        return result
+    
+
+
     def verify_data(self, sig_filename, data, extra_args=None):
         """
         Verify the signature in sig_filename against data in memory
