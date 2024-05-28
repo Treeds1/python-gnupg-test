@@ -1481,11 +1481,11 @@ class GPG(object):
     def verify(self, data, **kwargs):
         """
         Verify the signature on the contents of the string *data*. This method delegates most of the work to
-        `verify_file()`.
+        `verify_files()`.
 
         Args:
             data (str|bytes): The data to verify.
-            kwargs (dict): Keyword arguments, which are passed to `verify_file()`:
+            kwargs (dict): Keyword arguments, which are passed to `verify_files()`:
 
                 * fileobj_or_path (str|file): A path to a signature, or a file-like object containing one.
 
@@ -1496,11 +1496,11 @@ class GPG(object):
                 * extra_args (list[str]): Additional arguments to pass to `gpg`.
         """
         f = _make_binary_stream(data, self.encoding)
-        result = self.verify_file(f, **kwargs)
+        result = self.verify_files(f, **kwargs)
         f.close()
         return result
 
-    def verify_file(self, fileobj_or_path, data_filename=None, close_file=True, extra_args=None):
+    def verify_files(self, fileobj_or_path, data_filename=None, close_file=True, extra_args=None):
         """
         Verify a signature.
 
@@ -1513,7 +1513,7 @@ class GPG(object):
 
             extra_args (list[str]): Additional arguments to pass to `gpg`.
         """
-        logger.debug('verify_file: %r, %r', fileobj_or_path, data_filename)
+        logger.debug('verify_files: %r, %r', fileobj_or_path, data_filename)
         result = self.result_map['verify'](self)
         args = ['--verify']
         if extra_args:  # pragma: no cover
